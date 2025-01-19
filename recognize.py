@@ -1,86 +1,69 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 import sys
-from tensorflow.keras.models import load_model
 
-def segment_characters(license_plate_image):
-    segmentation_spacing = 0.85
+def preprocess_image(image_path):
+    # Load the image
+    image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    img_gray = cv2.cvtColor(license_plate_image, cv2.COLOR_RGB2GRAY)
-    ret, img_threshold = cv2.threshold(img_gray, 100, 255, cv2.THRESH_BINARY_INV)
+    # Apply GaussianBlur to reduce noise
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
-    white = []
-    black = []
-    height, width = img_threshold.shape
+    # Apply adaptive thresholding for better segmentation
+    ret, img_threshold = cv2.threshold(blurred, 100, 255, cv2.THRESH_BINARY_INV)
 
-    white_max = 0
-    black_max = 0
+    return image, img_threshold
 
-    for i in range(width):
-        white_count = 0
-        black_count = 0
-        for j in range(height):
-            if img_threshold[j, i] == 255:
-                white_count += 1
-            else:
-                black_count += 1
+def find_contours(thresh):
+    # Find contours in the thresholded image
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    return contours
 
-        white.append(white_count)
-        black.append(black_count)
-
-    white_max = max(white)
-    black_max = max(black)
-
-    def find_end(start):
-        end = start + 1
-        for m in range(start + 1, width - 1):
-            if black[m] > segmentation_spacing * black_max:
-                end = m
-                break
-        return end
-
-    n = 1
-    start = 1
-    end = 2
+def extract_characters(image, contours):
     characters = []
-    
-    while n < width - 1:
-        n += 1
-        if white[n] > (1 - segmentation_spacing) * white_max:
-            start = n
-            end = find_end(start)
-            n = end
-            if end - start > 5: 
-                character = img_threshold[1:height, start:end]
-                characters.append(character)
-                cv2.imshow('character', character)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
-    return characters
+    char_dimensions = []
 
+    # Get image dimensions
+    image_height, image_width = image.shape[:2]
 
-def recognize_characters(model, char_images, characters): # placeholder na funkcje
-    return "brak" 
+    for contour in contours:
+        # Get bounding box for each contour
+        x, y, w, h = cv2.boundingRect(contour)
 
+        # Define size thresholds based on image size
+        min_h = image_height * 0.15  # Minimum height as a percentage of image height
+        min_w = image_width * 0.06   # Minimum width as a percentage of image width
+        max_h = image_height * 1  # Minimum height as a percentage of image height
+        max_w = image_width * 0.4   # Minimum width as a percentage of image width
 
+        # Filter out small regions that are unlikely to be characters
+        if h > min_h and w > min_w and h < max_h and w < max_w:  # Adjust based on your license plate size
+            char_roi = image[y:y+h, x:x+w]
+            characters.append(char_roi)
+            char_dimensions.append((x, y, w, h))
 
-if __name__ == "__main__":
-    # model = load_model("character_recognition_model.keras")
+    # Sort characters by their x-coordinate for proper sequence
+    sorted_indices = sorted(range(len(characters)), key=lambda i: char_dimensions[i][0])
+    sorted_characters = [characters[i] for i in sorted_indices]
 
-    characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    return sorted_characters
 
-    license_plate_path = sys.argv[1]  
-    license_plate_image = cv2.imread(license_plate_path)
+def save_and_display_characters(characters):
+    for idx, char in enumerate(characters):
+        # Resize for visualization
+        char_resized = cv2.resize(char, (50, 100))
+        plt.subplot(1, len(characters), idx + 1)
+        plt.imshow(char_resized, cmap='gray')
+        plt.axis('off')
+    plt.show()
 
-    if license_plate_image is None:
-        print("Nie można wczytać obrazu tablicy rejestracyjnej.")
-        exit()
+def main(image_path):
+    image, thresh = preprocess_image(image_path)
+    contours = find_contours(thresh)
+    characters = extract_characters(thresh, contours)
+    save_and_display_characters(characters)
 
-    char_images = segment_characters(license_plate_image)
-    if not char_images:
-        print("Nie udało się zsegmentować żadnych znaków.")
-        exit()
-
-    # recognized_text = recognize_characters(model, char_images, characters)
-
-    # print("Odczytana tablica rejestracyjna:", recognized_text)
+# Example usage
+main(sys.argv[1])
