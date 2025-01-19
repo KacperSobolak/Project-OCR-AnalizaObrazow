@@ -380,6 +380,7 @@ def preprocess_image(image):
 
     thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
                                    cv2.THRESH_BINARY_INV, 15, 10)
+    
     return image, thresh
 
 def extract_characters(image, contours):
@@ -391,7 +392,7 @@ def extract_characters(image, contours):
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
 
-        min_h = image_height * 0.3 
+        min_h = image_height * 0.5 
         min_w = image_width * 0.04  
         max_h = image_height * 1  
         max_w = image_width * 0.3    

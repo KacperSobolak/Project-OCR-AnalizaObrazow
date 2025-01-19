@@ -6,7 +6,7 @@ import cv2
 
 plt.figure()
 
-img = cv2.imread("Photos/image8.jpg")
+img = cv2.imread("Photos/image12.jpg")
 
 gray=img.mean(axis=2)/255
 
@@ -20,9 +20,11 @@ v_bands=s.band_detection(v_proj_blured.copy())
 
 candidates=[]
 for v_band in v_bands:
+    blur_size = img.shape[1] // 5
+    blur_size = blur_size + 1 if blur_size % 2 == 0 else blur_size
     h_edges=s.horizontal_sobel(gray[v_band[0]:v_band[1],:])
     h_proj=s.horizontal_projection(h_edges)
-    h_proj_blured=s.blur_vector(h_proj,np.ones(101)/101)
+    h_proj_blured=s.blur_vector(h_proj,np.ones(blur_size)/blur_size)
     h_bands=s.band_detection(h_proj_blured.copy())
     for h_band in h_bands:
         h_band_proj=h_proj_blured[h_band[0]:h_band[1]]
@@ -47,7 +49,6 @@ for c in sorted_candidates:
     image,thresh=s.preprocess_image(img[c[0][0]:c[0][1],pom_l:pom_r])
     contours=s.find_contours(thresh)
     sorted_characters=s.extract_characters(thresh,contours)
-    print(str(len(sorted_characters)))
     if max < len(sorted_characters):
         max = len(sorted_characters)
         matches.clear()
