@@ -2,10 +2,11 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 import segmentation as s
+import cv2
 
 plt.figure()
 
-img = mpimg.imread('Photos/image8.jpg')
+img = cv2.imread("Photos/image8.jpg")
 
 gray=img.mean(axis=2)/255
 
@@ -32,20 +33,25 @@ for v_band in v_bands:
 
 sorted_candidates = sorted(candidates, key=lambda x: x[2])
 
+matches = []
+max = 0
 for c in sorted_candidates:
-    
     pom_l=c[1][0]-15
     if(pom_l<0):
         pom_l=0
     pom_r=c[1][1]+15
     if(pom_r>gray.shape[1]):
         pom_r=gray.shape[1]
-    plt.imshow(gray[c[0][0]:c[0][1],pom_l:pom_r],cmap='gray')
-    plt.show()
-    image,thresh=s.preprocess_image(gray[c[0][0]:c[0][1],pom_l:pom_r])
+    # plt.imshow(gray[c[0][0]:c[0][1],pom_l:pom_r],cmap='gray')
+    # plt.show()
+    image,thresh=s.preprocess_image(img[c[0][0]:c[0][1],pom_l:pom_r])
     contours=s.find_contours(thresh)
     sorted_characters=s.extract_characters(thresh,contours)
     print(str(len(sorted_characters)))
+    if max < len(sorted_characters):
+        max = len(sorted_characters)
+        matches.clear()
+        matches = sorted_characters
     # binary=s.otsu_binarization(gray[c[0][0]:c[0][1],pom_l:pom_r]*255)
     # bin_proj=s.horizontal_projection(binary)
     # char_separators=s.divide_into_chars(bin_proj.copy())
@@ -71,3 +77,6 @@ for c in sorted_candidates:
     #     plt.show()
     # else:
     #     print("Candidate skipped")
+
+
+s.save_and_display_characters(matches)
