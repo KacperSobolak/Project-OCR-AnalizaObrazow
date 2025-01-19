@@ -12,6 +12,8 @@ Przed kompilacją upewnij się, że masz zainstalowanego Pythona (w wersji 3). N
 
    ```bash
    pip3 install Pillow
+   pip3 install matplotlib
+   pip3 install cv2
    ```
 
 2. Sklonuj repozytorium projektu:
