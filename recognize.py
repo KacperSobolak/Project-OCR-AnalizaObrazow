@@ -12,14 +12,13 @@ def preprocess_image(image_path):
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
     # Apply adaptive thresholding for better segmentation
-    ret, img_threshold = cv2.threshold(blurred, 100, 255, cv2.THRESH_BINARY_INV)
+    thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                                   cv2.THRESH_BINARY_INV, 15, 10)
 
-    return image, img_threshold
-
-def find_contours(thresh):
-    # Find contours in the thresholded image
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    return contours
+    # Apply morphological operations to clean noise
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=1)
+    return image, thresh
 
 def extract_characters(image, contours):
     characters = []
@@ -33,13 +32,13 @@ def extract_characters(image, contours):
         x, y, w, h = cv2.boundingRect(contour)
 
         # Define size thresholds based on image size
-        min_h = image_height * 0.15  # Minimum height as a percentage of image height
-        min_w = image_width * 0.06   # Minimum width as a percentage of image width
-        max_h = image_height * 1  # Minimum height as a percentage of image height
-        max_w = image_width * 0.4   # Minimum width as a percentage of image width
+        min_h = image_height * 0.4  # Minimum height
+        min_w = image_width * 0.04   # Minimum width
+        max_h = image_height * 0.8   # Maximum height
+        max_w = image_width * 0.3    # Maximum width
 
-        # Filter out small regions that are unlikely to be characters
-        if h > min_h and w > min_w and h < max_h and w < max_w:  # Adjust based on your license plate size
+        # Filter out regions based on size
+        if min_h < h < max_h and min_w < w < max_w:
             char_roi = image[y:y+h, x:x+w]
             characters.append(char_roi)
             char_dimensions.append((x, y, w, h))
@@ -49,6 +48,12 @@ def extract_characters(image, contours):
     sorted_characters = [characters[i] for i in sorted_indices]
 
     return sorted_characters
+
+
+def find_contours(thresh):
+    # Find contours in the thresholded image
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    return contours
 
 def save_and_display_characters(characters):
     for idx, char in enumerate(characters):
