@@ -20,7 +20,7 @@ class OCRApp(ttk.Frame):
 
     def setup_widgets(self):
         # Ramka do przycisków ładujących i przetwarzających obraz
-        self.buttons_frame = ttk.LabelFrame(self, text="Zdjęcie", padding=(10, 10))
+        self.buttons_frame = ttk.LabelFrame(self, text="Opcje", padding=(10, 10))
         self.buttons_frame.grid(
             row=0, column=0, padx=10, pady=(10, 10), sticky="nsew"
         )
@@ -38,6 +38,8 @@ class OCRApp(ttk.Frame):
             row=1, column=0, padx=10, pady=(10, 10), sticky="nsew"
         )
         self.results_frame.columnconfigure(0, weight=1)
+
+        self.results_label = None
 
         # Ramka z przyciskami pomocy (jak użyć / informacja o autorach)
         self.help_frame = ttk.LabelFrame(self, text="Pomoc", padding=(10, 10))
@@ -64,18 +66,25 @@ class OCRApp(ttk.Frame):
         self.instruction_label = tk.Label(self.image_frame, text="Wczytaj zdjęcie aby rozpocząć.", anchor="center")
         self.instruction_label.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
+        self.progress_bar = ttk.Progressbar(self.image_frame, orient="horizontal", mode="determinate")
+        self.progress_bar.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
+        self.progress_bar['value'] = 0
+
     def load_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.bmp")])
 
         if file_path:
+            self.progress_bar["value"] = 0
             self.image = Image.open(file_path)
 
             self.instruction_label.grid_forget()
+            if self.results_label:
+                self.results_label.grid_forget()
 
             self.display_image()
 
     def display_image(self):
-        thumbnail_image = self.image;
+        thumbnail_image = self.image
         thumbnail_image.thumbnail((self.image_frame.winfo_width(), self.image_frame.winfo_height()))
 
         self.tk_image = ImageTk.PhotoImage(thumbnail_image)
@@ -87,6 +96,18 @@ class OCRApp(ttk.Frame):
     def process_image(self):
         if self.image == None:
             messagebox.showwarning("Brak zdjęcia do przetworzenia", "Wczytaj zdjęcie przed przetworzeniem!")
+            return
+        
+        self.progress_bar["value"] = 0
+        self.update_progress(0)
+
+    def update_progress(self, value):
+        if value <= 100:
+            self.progress_bar["value"] = value
+            self.after(50, self.update_progress, value + 5)
+        else:
+            self.results_label = tk.Label(self.results_frame, text="Odczytana rejestracja:\n\nWKZNY68", anchor="w", justify="left")
+            self.results_label.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
     def show_how_to_use(self):
         messagebox.showinfo("Jak używać", "Jak używać aplikacji:\n\n"
