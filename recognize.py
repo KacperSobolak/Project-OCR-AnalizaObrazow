@@ -2,6 +2,15 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import tensorflow as tf
+
+dictionary = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'A': 10,
+                  'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15, 'G': 16, 'H': 17, 'I': 18, 'J': 19, 'K': 20,
+                  'L': 21, 'M': 22, 'N': 23, 'P': 24, 'Q': 25, 'R': 26, 'S': 27, 'T': 28, 'U': 29, 'V': 30,
+                  'W': 31, 'X': 32, 'Y': 33, 'Z': 34}
+
+needed_height = 100
+needed_width = 50
 
 def preprocess_image(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)    
@@ -56,17 +65,39 @@ def save_and_display_characters(characters):
     plt.show()
 
 
+def get_text_from_character_images(characters):
+    characters=[cv2.resize(char,(needed_width,needed_height)) for char in characters]   # black images on white background
+    inverted_characters = [cv2.bitwise_not(char) for char in characters ]   # black images on white background
+    reshaped_input_characters=[np.expand_dims(char, axis=-1) for char in inverted_characters]
+    normalized_input_characters=[char/255.0 for char in reshaped_input_characters]
+
+
+    our_cnn_model=tf.keras.models.load_model('models/char_recognition_cnn.keras')
+    print('Loaded model')
+    
+    text=""
+    
+    for char in normalized_input_characters:
+        char_with_batch=np.expand_dims(char,axis=0)
+        prediction=our_cnn_model.predict(char_with_batch)
+        predicted_label=int(np.argmax(prediction))
+        for key,value in dictionary.items():
+            if value==predicted_label:
+                text+=key
+   
+    return text
+
+
 def main(image_path):
     image, thresh = preprocess_image(image_path)
-    plt.figure()
-    plt.imshow(thresh, cmap='gray')
     contours = find_contours(thresh)
     characters = extract_characters(thresh, contours)   # white images on black background
     
     
-    inverted_characters = [cv2.bitwise_not(char) for char in characters ]   # black images on white background
-
+    text=get_text_from_character_images(characters)
+    print("Odnaleziony tekst to: "+text)
+    
     save_and_display_characters(characters)
-    save_and_display_characters(inverted_characters)
 
+    
 main(sys.argv[1])

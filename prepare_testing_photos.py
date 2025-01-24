@@ -5,7 +5,7 @@ import os
 from tqdm import tqdm
 
 input_dir='TrainLetters/'
-output_dir='BinaryTrainLetters/'
+output_dir='LettersImages/'
 
 new_width = 50
 new_height = 100

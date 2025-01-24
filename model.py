@@ -21,7 +21,7 @@ def load_data():
                   'L': 21, 'M': 22, 'N': 23, 'P': 24, 'Q': 25, 'R': 26, 'S': 27, 'T': 28, 'U': 29, 'V': 30,
                   'W': 31, 'X': 32, 'Y': 33, 'Z': 34}
 
-    directories = [directory for directory in glob.glob('BinaryTrainLetters/*')]
+    directories = [directory for directory in glob.glob('LettersImages/*')]
 
     for directory in directories:   # in each symbol directory
         all_files_in_subdir = glob.glob(directory + '/*.jpg') # we have a file list for each subdirectory
@@ -66,7 +66,7 @@ model.fit(train_images, train_labels, epochs=8,callbacks=[early_stopping])
 end=time.time()
 
 #model.save('models/char_recognition_cnn.h5')
-#model.save('models/char_recognition_cnn.keras')    # recommended new format
+model.save('models/char_recognition_cnn.keras')    # recommended new format
 print('Saved model')
 print(f'Training duration: {end - start} seconds')
 
