@@ -6,12 +6,14 @@ Do poprawnego uruchomienia aplikacji wymagane jest pobranie poniższych bibliote
 - [Pillow](https://pypi.org/project/pillow/): biblioteka do obsługi obrazów w Pythonie.
 
 ## Instalacja
-Przed kompilacją upewnij się, że masz zainstalowanego Pythona (w wersji 3). Następnie wykonaj poniższe kroki:
+Przed kompilacją upewnij się, że masz zainstalowanego Pythona (w wersji 3.10). Następnie wykonaj poniższe kroki:
 
 1. Zainstaluj wymagane biblioteki:
 
    ```bash
    pip3 install Pillow
+   pip3 install matplotlib
+   pip3 install cv2
    ```
 
 2. Sklonuj repozytorium projektu:
