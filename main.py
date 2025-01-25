@@ -8,7 +8,6 @@ import matplotlib.image as mpimg
 import numpy as np
 import segmentation as s
 import cv2
-import threading
 
 class OCRApp(ttk.Frame):
     def __init__(self, parent):
@@ -78,7 +77,7 @@ class OCRApp(ttk.Frame):
 
     def handleProcessButton(self):
         self.status_label.config(text="Proces OCR:\nROZPOCZĘTY")
-        threading.Thread(target=self.process_image_with_error_handling).start()
+        self.process_image_with_error_handling()
 
     def process_image_with_error_handling(self):
         try:
