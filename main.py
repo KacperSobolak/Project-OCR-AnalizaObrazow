@@ -34,7 +34,7 @@ class OCRApp(ttk.Frame):
         self.load_button = ttk.Button(self.buttons_frame, text="Wczytaj zdjęcie", command=self.load_image)
         self.load_button.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
-        self.process_button = ttk.Button(self.buttons_frame, text="Przetwórz zdjęcie", command=self.process_image)
+        self.process_button = ttk.Button(self.buttons_frame, text="Przetwórz zdjęcie", command=self.handleProcessButton)
         self.process_button.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
         # Ramka do wyświetlania wyników OCRa
@@ -44,7 +44,11 @@ class OCRApp(ttk.Frame):
         )
         self.results_frame.columnconfigure(0, weight=1)
 
-        self.results_label = None
+        self.status_label = ttk.Label(self.results_frame, text="Proces OCR:\n")
+        self.status_label.grid(row=0, column=0, sticky="w")
+
+        self.results_label = ttk.Label(self.results_frame, text="Odczytany tekst rejestracji:\n")
+        self.results_label.grid(row=1, column=0, sticky="w")
 
         # Ramka z przyciskami pomocy (jak użyć / informacja o autorach)
         self.help_frame = ttk.LabelFrame(self, text="Pomoc", padding=(10, 10))
@@ -71,20 +75,28 @@ class OCRApp(ttk.Frame):
         self.instruction_label = tk.Label(self.image_frame, text="Wczytaj zdjęcie aby rozpocząć.", anchor="center")
         self.instruction_label.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
-        self.progress_bar = ttk.Progressbar(self.image_frame, orient="horizontal", mode="determinate")
-        self.progress_bar.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
-        self.progress_bar['value'] = 0
+    def handleProcessButton(self):
+        self.status_label.config(text="Proces OCR:\nROZPOCZĘTY")
+        self.process_image_with_error_handling()
+
+    def process_image_with_error_handling(self):
+        try:
+            self.process_image()
+        except Exception as e:
+            self.status_label.config(text="Proces OCR:\nBŁĄD")
+            return
 
     def load_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.bmp")])
 
         if file_path:
-            self.progress_bar["value"] = 0
             self.image = Image.open(file_path)
 
             self.instruction_label.grid_forget()
             if self.results_label:
-                self.results_label.grid_forget()
+                self.results_label.config(text="Odczytany tekst rejestracji:\n")
+            if self.status_label:
+                self.status_label.config(text="Proces OCR:\n")
 
             self.display_image()
 
@@ -180,7 +192,11 @@ class OCRApp(ttk.Frame):
             # else:
             #     print("Candidate skipped")
 
-        s.save_and_display_characters(matches)
+        text=s.get_text_from_character_images(matches)
+        self.results_label.config(text="Odczytany tekst rejestracji:\n" + text)
+        self.status_label.config(text="Proces OCR:\nZAKOŃCZONY")
+
+        #s.save_and_display_characters(matches)
 
     def show_how_to_use(self):
         messagebox.showinfo("Jak używać", "Jak używać aplikacji:\n\n"
