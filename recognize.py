@@ -72,7 +72,7 @@ def get_text_from_character_images(characters):
     normalized_input_characters=[char/255.0 for char in reshaped_input_characters]
 
 
-    our_cnn_model=tf.keras.models.load_model('models/char_recognition_cnn.keras')
+    our_cnn_model=tf.keras.models.load_model('models/char_recognition_cnn_v2.keras')
     print('Loaded model')
     
     text=""

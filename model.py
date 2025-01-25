@@ -65,8 +65,8 @@ early_stopping = EarlyStopping(monitor='val_loss', patience = 3, restore_best_we
 model.fit(train_images, train_labels, epochs=8,callbacks=[early_stopping])
 end=time.time()
 
-#model.save('models/char_recognition_cnn.h5')
-model.save('models/char_recognition_cnn.keras')    # recommended new format
+
+model.save('models/char_recognition_cnn_v2.keras')   
 print('Saved model')
 print(f'Training duration: {end - start} seconds')
 
