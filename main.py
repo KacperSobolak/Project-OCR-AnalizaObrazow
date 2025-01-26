@@ -87,7 +87,7 @@ class OCRApp(ttk.Frame):
             return
 
     def load_image(self):
-        file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.bmp")])
+        file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg")])
 
         if file_path:
             self.image = Image.open(file_path)
