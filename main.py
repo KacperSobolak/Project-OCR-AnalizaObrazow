@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import filedialog
 from tkinter import messagebox
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
@@ -8,6 +7,8 @@ import matplotlib.image as mpimg
 import numpy as np
 import segmentation as s
 import cv2
+from PyQt5.QtWidgets import QApplication, QFileDialog
+import sys
 
 class OCRApp(ttk.Frame):
     def __init__(self, parent):
@@ -86,8 +87,22 @@ class OCRApp(ttk.Frame):
             self.status_label.config(text="Proces OCR:\nBŁĄD")
             return
 
+    @staticmethod
+    def get_file_path():
+        app = QApplication(sys.argv)
+        options = QFileDialog.Options()
+        options |= QFileDialog.ReadOnly
+        file_path, _ = QFileDialog.getOpenFileName(
+            None,
+            "Wybierz obraz",
+            "",
+            "Image Files (*.png *.jpg)",
+            options=options
+        )
+        return file_path
+
     def load_image(self):
-        file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg")])
+        file_path = self.get_file_path()
 
         if file_path:
             self.image = Image.open(file_path)
