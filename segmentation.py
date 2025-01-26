@@ -34,12 +34,6 @@ def apply_kernel(im, kernel,pad_mode='edge'):
             result[i,j]=np.sum(matrix*kernel)
     return result
 
-# def horizontal_edge_detection(gray):
-#     kernel=np.zeros((3,3))
-#     kernel[0,:]=-1
-#     kernel[2,:]=1
-#     return abs(apply_kernel(gray,kernel)) 
-
 def vertical_edge_detection(gray): 
     kernel=np.zeros((3,3))
     kernel[:,0]=-1
@@ -64,12 +58,6 @@ def vertical_sobel(gray):
 
 def sobel_edge_detection(gray):
     return horizontal_sobel(gray)+vertical_sobel(gray)
-
-# def horizontal_blur(im):
-#     return apply_kernel(im,np.ones((1,9))/(1*9))
-
-# def vertical_blur(im):
-#     return apply_kernel(im,np.ones((9,1))/(1*9))
 
 def horizontal_projection(edges_im):
     return np.sum(edges_im,axis=0)
@@ -193,51 +181,41 @@ def gaussian_adaptive_threshold(img_plate, block_size=11, C=2, sigma=1.0):
     return binary
 
 def otsu_binarization(image):
-    # Compute the histogram
     hist, bins = np.histogram(image.ravel(), bins=256, range=(0, 256))
     
-    # Total number of pixels
     total_pixels = image.size
     
-    # Initialize variables
     current_max_variance = 0
     best_threshold = 0
-    sum_total = np.dot(np.arange(256), hist)  # Sum of all pixel values
+    sum_total = np.dot(np.arange(256), hist) 
     sum_background = 0
     weight_background = 0
     weight_foreground = 0
 
     for threshold in range(256):
-        # Update background weight and sum
         weight_background += hist[threshold]
         if weight_background == 0:
             continue
 
-        # Update foreground weight
         weight_foreground = total_pixels - weight_background
 
         if weight_foreground == 0:
             break
 
-        # Update background sum
         sum_background += threshold * hist[threshold]
 
-        # Calculate means
         mean_background = sum_background / weight_background
         mean_foreground = (sum_total - sum_background) / weight_foreground
 
-        # Calculate between-class variance
         variance_between = (
             weight_background * weight_foreground *
             (mean_background - mean_foreground) ** 2
         )
 
-        # Check if this is the best threshold
         if variance_between > current_max_variance:
             current_max_variance = variance_between
             best_threshold = threshold
 
-    # Apply the optimal threshold to binarize the image
     binary_image = (image > best_threshold).astype(np.uint8) * 255
 
     return binary_image
@@ -311,9 +289,6 @@ def valid_candidate(char_separators, width,threshold=0.33):
 
     mean=np.mean(widths)
     std=np.std(widths)
-    # print("mean: "+str(mean))
-    # print("std: "+str(std))
-    # print(str(std-threshold*mean))
     if std<threshold*mean:
         return True
     return False
@@ -423,8 +398,8 @@ def find_contours(thresh):
     return contours
 
 def get_text_from_character_images(characters):
-    characters=[cv2.resize(char,(needed_width,needed_height)) for char in characters]   # black images on white background
-    inverted_characters = [cv2.bitwise_not(char) for char in characters ]   # black images on white background
+    characters=[cv2.resize(char,(needed_width,needed_height)) for char in characters] 
+    inverted_characters = [cv2.bitwise_not(char) for char in characters ]  
     reshaped_input_characters=[np.expand_dims(char, axis=-1) for char in inverted_characters]
     normalized_input_characters=[char/255.0 for char in reshaped_input_characters]
 
