@@ -66,8 +66,8 @@ def save_and_display_characters(characters):
 
 
 def get_text_from_character_images(characters):
-    characters=[cv2.resize(char,(needed_width,needed_height)) for char in characters]   # black images on white background
-    inverted_characters = [cv2.bitwise_not(char) for char in characters ]   # black images on white background
+    characters=[cv2.resize(char,(needed_width,needed_height)) for char in characters] 
+    inverted_characters = [cv2.bitwise_not(char) for char in characters ]  
     reshaped_input_characters=[np.expand_dims(char, axis=-1) for char in inverted_characters]
     normalized_input_characters=[char/255.0 for char in reshaped_input_characters]
 
@@ -91,7 +91,7 @@ def get_text_from_character_images(characters):
 def main(image_path):
     image, thresh = preprocess_image(image_path)
     contours = find_contours(thresh)
-    characters = extract_characters(thresh, contours)   # white images on black background
+    characters = extract_characters(thresh, contours) 
     
     
     text=get_text_from_character_images(characters)

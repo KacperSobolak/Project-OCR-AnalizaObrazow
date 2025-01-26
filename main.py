@@ -172,8 +172,6 @@ class OCRApp(ttk.Frame):
             pom_r=c[1][1]+15
             if(pom_r>gray.shape[1]):
                 pom_r=gray.shape[1]
-            # plt.imshow(gray[c[0][0]:c[0][1],pom_l:pom_r],cmap='gray')
-            # plt.show()
             image,thresh=s.preprocess_image(img[c[0][0]:c[0][1],pom_l:pom_r])
             contours=s.find_contours(thresh)
             sorted_characters=s.extract_characters(thresh,contours)
@@ -181,37 +179,11 @@ class OCRApp(ttk.Frame):
                 max = len(sorted_characters)
                 matches.clear()
                 matches = sorted_characters
-            # binary=s.otsu_binarization(gray[c[0][0]:c[0][1],pom_l:pom_r]*255)
-            # bin_proj=s.horizontal_projection(binary)
-            # char_separators=s.divide_into_chars(bin_proj.copy())
-            # sorted_char_separators=sorted(char_separators)
-            # print(sorted_char_separators)
-            # #print(str(c)+"\n")
-            # if(s.valid_candidate(sorted_char_separators,len(bin_proj))):
-            #     n=len(sorted_char_separators)
-            #     x_l=0
-            #     plt.subplot(2,n//2+1,1)
-            #     plt.imshow(binary,cmap='gray')
-            #     for i in range(n):
-            #         labeled_img, max_label=s.labelize_char_area(binary[:,x_l:sorted_char_separators[i]])
-            #         print(str(max_label))
-            #         char=s.analyze_labels(labeled_img,max_label)
-            #         plt.subplot(2,n//2+2,i+2)
-            #         plt.imshow(char,cmap='gray')
-            #         x_l=sorted_char_separators[i]
-            #     labeled_img, max_label=s.labelize_char_area(binary[:,x_l:])
-            #     char=s.analyze_labels(labeled_img,max_label)
-            #     plt.subplot(2,n//2+2,n+3)
-            #     plt.imshow(char,cmap='gray')
-            #     plt.show()
-            # else:
-            #     print("Candidate skipped")
-
+        
         text=s.get_text_from_character_images(matches)
         self.results_label.config(text="Odczytany tekst rejestracji:\n" + text)
         self.status_label.config(text="Proces OCR:\nZAKOŃCZONY")
 
-        #s.save_and_display_characters(matches)
 
     def show_how_to_use(self):
         messagebox.showinfo("Jak używać", "Jak używać aplikacji:\n\n"

@@ -4,7 +4,6 @@ import numpy as np
 from PIL import Image
 from sklearn.model_selection import train_test_split
 import time
-import os
 from tensorflow.keras.callbacks import EarlyStopping
 import matplotlib.pyplot as plt
 
@@ -23,20 +22,17 @@ def load_data():
 
     directories = [directory for directory in glob.glob('LettersImages/*')]
 
-    for directory in directories:   # in each symbol directory
-        all_files_in_subdir = glob.glob(directory + '/*.jpg') # we have a file list for each subdirectory
+    for directory in directories:  
+        all_files_in_subdir = glob.glob(directory + '/*.jpg') 
         images_from_current_subdir = np.array([np.array(Image.open(file)) for file in all_files_in_subdir])
-        #print(directory[-1],type(directory[-1]))   # gets last character of directory name
-        labels_from_current_subdir = [dictionary[directory[-1]]] * len(images_from_current_subdir)  # we've got as many same labels as images in subdirectory
+        labels_from_current_subdir = [dictionary[directory[-1]]] * len(images_from_current_subdir) 
         images = np.append(images, images_from_current_subdir, axis=0)
         labels = np.append(labels, labels_from_current_subdir, axis=0)
-        # we've got all images and labels in order
     x_train, x_test, y_train, y_test = train_test_split(images, labels, test_size=0.2, random_state=42, shuffle=True)
     return (x_train, y_train), (x_test, y_test)
 
 
 def create_model():
-    # creating convolutional base
     model = models.Sequential()
     model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(height, width, channel)))
     model.add(layers.MaxPooling2D((2, 2)))
@@ -45,12 +41,11 @@ def create_model():
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
     model.add(layers.Flatten())
     model.add(layers.Dense(64, activation='relu'))
-    model.add(layers.Dense(units=35, activation='softmax'))   # 35 classes on output layer
+    model.add(layers.Dense(units=35, activation='softmax'))   
     return model
 
 
 (train_images, train_labels), (test_images, test_labels) = load_data()
-# print(train_images.shape) #(28400, 100, 50)
 train_images = train_images.reshape((train_images.shape[0], height, width, channel))
 test_images = test_images.reshape((test_images.shape[0], height, width, channel))
 train_images, test_images = train_images / 255.0, test_images / 255.0
